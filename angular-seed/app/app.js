@@ -14,7 +14,20 @@ config(['$routeProvider', function($routeProvider) {
 
 myapp.controller('MainCtrl', function ($scope) {
   $scope.showContent = function($fileContent){
-    $scope.content = $fileContent;
+    //Wrap the log file in open/close JSON tags
+    $scope.content = "[";
+    $scope.content += $fileContent;
+
+    //The .log entries are delimited with new lines. Replace with commas for JSON
+    $scope.content = $scope.content.replace(/\n/g, ",");
+
+    //Remove last instance of comma
+    $scope.content = $scope.content.substring(0, $scope.content.length-1);
+    $scope.content += "]";
+    
+    //Check if valid JSON
+    $scope.content = JSON.parse($scope.content);
+    //$scope.content = JSON.stringify($scope.content);
   };
 });
 
