@@ -13,7 +13,7 @@ config(['$routeProvider', function($routeProvider) {
 }]);
 
 
-myapp.controller('MainCtrl', function ($scope, ngTableParams) {
+myapp.controller('MainCtrl', function ($scope, $filter, ngTableParams) {
   $scope.showContent = function($fileContent){
     //Wrap the log file in open/close JSON tags
     var data = "[";
@@ -36,8 +36,17 @@ myapp.controller('MainCtrl', function ($scope, ngTableParams) {
       count: 10           // count per page
     }, {
       total: data.length, // length of data
+
+
+
       getData: function($defer, params) {
-        $defer.resolve(data.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+
+        // use build-in angular filter
+        var orderedData = params.sorting() ?
+            $filter('orderBy')(data, params.orderBy()) :
+            data;
+
+        $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
       }
     });
   };
