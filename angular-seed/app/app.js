@@ -5,31 +5,50 @@ var myapp = angular.module('myApp', [
   'ngRoute',
   'myApp.view1',
   'myApp.view2',
-  'myApp.version'
+  'myApp.version',
+    'ngTable'
 ]).
 config(['$routeProvider', function($routeProvider) {
   $routeProvider.otherwise({redirectTo: '/view1'});
 }]);
 
 
-myapp.controller('MainCtrl', function ($scope) {
+myapp.controller('MainCtrl', function ($scope, ngTableParams) {
   $scope.showContent = function($fileContent){
     //Wrap the log file in open/close JSON tags
-    $scope.content = "[";
-    $scope.content += $fileContent;
+    var data = "[";
+    data += $fileContent;
 
     //The .log entries are delimited with new lines. Replace with commas for JSON
-    $scope.content = $scope.content.replace(/\n/g, ",");
+    data = data.replace(/\n/g, ",");
 
     //Remove last instance of comma
-    $scope.content = $scope.content.substring(0, $scope.content.length-1);
-    $scope.content += "]";
-    
+    data = data.substring(0, data.length-1);
+    data += "]";
     //Check if valid JSON
-    $scope.content = JSON.parse($scope.content);
+    data = JSON.parse(data);
     //$scope.content = JSON.stringify($scope.content);
+    console.log(data.length);
+
+
+    $scope.tableParams = new ngTableParams({
+      page: 1,            // show first page
+      count: 10           // count per page
+    }, {
+      total: data.length, // length of data
+      getData: function($defer, params) {
+        $defer.resolve(data.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+      }
+    });
   };
 });
+
+/*myapp.controller('tableController', function($scope, ngTableParams) {
+
+
+
+
+});*/
 
 myapp.directive('onReadFile', function ($parse) {
   return {
