@@ -1,20 +1,12 @@
 'use strict';
 
 // Declare app level module which depends on views, and components
-var myapp = angular.module('myApp', [
-  'ngRoute',
-  'myApp.view1',
-  'myApp.view2',
-  'myApp.version',
-    'ngTable'
-]).
-config(['$routeProvider', function($routeProvider) {
-  $routeProvider.otherwise({redirectTo: '/view1'});
-}]);
+var myapp = angular.module('myApp', ['ngTable']);
 
 
 myapp.controller('MainCtrl', function ($scope, $filter, ngTableParams) {
   $scope.showContent = function($fileContent){
+    $scope.fileLoad = true;
     //Wrap the log file in open/close JSON tags
     var data = "[";
     data += $fileContent;
@@ -29,7 +21,8 @@ myapp.controller('MainCtrl', function ($scope, $filter, ngTableParams) {
     data = JSON.parse(data);
     //$scope.content = JSON.stringify($scope.content);
     console.log(data.length);
-
+    $scope.numOfRecords = data.length;
+    $scope.totalRecords = data.length;
 
     $scope.tableParams = new ngTableParams({
       page: 1,            // show first page
@@ -48,18 +41,23 @@ myapp.controller('MainCtrl', function ($scope, $filter, ngTableParams) {
 
       getData: function($defer, params) {
         // use build-in angular filter
+        //console.log("get filtered");
         var filteredData = params.filter() ?
             $filter('filter')(data, params.filter()) :
             data;
-        var orderedData = params.sorting() ?
+        //console.log("get ordered");
+        var orderedData = filteredData;/*params.sorting() ?
             $filter('orderBy')(filteredData, params.orderBy()) :
-            data;
-
+            data;*/
+        $scope.numOfRecords = orderedData.length;
+        //console.log("get total");
         params.total(orderedData.length); // set total for recalc pagination
+        //console.log("get resolve");
         $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
       }
       });
   };
+
 });
 
 /*myapp.controller('tableController', function($scope, ngTableParams) {
